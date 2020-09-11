@@ -1,6 +1,6 @@
 <?php
 
-namespace Easyrecrue\Tests;
+namespace Easyrecrue\Tests\HashingAlgorithm;
 
 use Easyrecrue\HashingAlgorithm\CuckooHashing;
 use Easyrecrue\HashingAlgorithm\HashingAlgorithm;

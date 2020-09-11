@@ -1,6 +1,6 @@
 <?php
 
-namespace Easyrecrue\Tests;
+namespace Easyrecrue\Tests\HashingAlgorithm;
 
 use Easyrecrue\HashingAlgorithm\HashingAlgorithm;
 use Easyrecrue\HashingAlgorithm\SimpleQueue;
