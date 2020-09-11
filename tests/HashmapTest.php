@@ -2,6 +2,7 @@
 
 namespace Easyrecrue\Tests;
 
+use Easyrecrue\HashingAlgorithm\CuckooHashing;
 use Easyrecrue\Hashmap;
 use Easyrecrue\InvalidFunctionNameException;
 use Easyrecrue\KeyAlreadyUsedException;
@@ -71,6 +72,19 @@ class HashmapTest extends TestCase
         $this->expectException(InvalidFunctionNameException::class);
         $this->expectExceptionMessage("There is no function named 'not_existing_function_name'.");
 
-        $hashmap = new Hashmap('not_existing_function_name');
+        new Hashmap('not_existing_function_name');
+    }
+
+    public function test_it_is_possible_to_provide_a_hashing_algorithm_to_use()
+    {
+        $hashmap = new Hashmap('md5', $algorithm = new CuckooHashing());
+
+        $hashmap
+            ->add('test')
+            ->add('hello');
+
+        $this->assertTrue($algorithm->has(md5('test')));
+        $this->assertTrue($algorithm->has(md5('hello')));
+        $this->assertFalse($algorithm->has('not existing key'));
     }
 }

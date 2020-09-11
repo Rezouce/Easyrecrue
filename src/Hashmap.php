@@ -11,9 +11,9 @@ class Hashmap
 
     private string $functionNameForKeyHash;
 
-    public function __construct(string $functionNameForKeyHash)
+    public function __construct(string $functionNameForKeyHash, HashingAlgorithm $algorithm = null)
     {
-        $this->hashing = new PhpArray();
+        $this->hashing = $algorithm ?? new PhpArray();
         $this->functionNameForKeyHash = $functionNameForKeyHash;
 
         if (!function_exists($functionNameForKeyHash)) {
