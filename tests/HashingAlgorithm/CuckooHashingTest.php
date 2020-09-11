@@ -14,7 +14,7 @@ class CuckooHashingTest extends HashingTest
 
     public function test_it_will_resize_itself_if_there_are_collisitions()
     {
-        $hashing = $this->getHashingAlgorithm();
+        $hashing = new CuckooHashing(1024);
 
         $this->assertFalse($hashing->has('key'));
 
