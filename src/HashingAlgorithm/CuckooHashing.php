@@ -2,6 +2,8 @@
 
 namespace Easyrecrue\HashingAlgorithm;
 
+use Easyrecrue\HashingAlgorithm\KeyHasher\BitHasherCode;
+use Easyrecrue\HashingAlgorithm\KeyHasher\JavaHasherCode;
 use SplFixedArray;
 
 /**
@@ -108,40 +110,14 @@ class CuckooHashing implements HashingAlgorithm
         return $hashValue % $this->capacity;
     }
 
-    /**+
-     * This is basically the String.hashCode implementation from Java.
-     */
     private function hash1(string $key): int
     {
-        $hash = 0;
-        $stringLength = strlen($key);
-
-        for ($i = 0; $i < $stringLength; ++$i) {
-            /**
-             * The value 31 was chosen because it is an odd prime number.
-             * A nice property of 31 is that the multiplication can be replaced by
-             * a shift and a subtraction for better performance: 31 * i == (i << 5) - i.
-             * Modern VMs do this sort of optimization automatically.
-             */
-            $hash = $this->overflowProtection(31 * $hash + ord($key[$i]));
-        }
-
-        return $hash;
+        return (new JavaHasherCode())->hash($key);
     }
 
-    /**+
-     * Another hash implementation found online.
-     */
     private function hash2(string $key): int
     {
-        $hash = 7;
-        $stringLength = strlen($key);
-
-        for ($i = 0; $i < $stringLength; ++$i) {
-            $hash ^= $this->overflowProtection($hash << 5 + ord($key[$i]) + $hash >> 2);
-        }
-
-        return $hash;
+        return (new BitHasherCode())->hash($key);
     }
 
     /**
