@@ -8,55 +8,49 @@ use Easyrecrue\HashingAlgorithm\KeyHasher\JavaHasherCode;
 
 /**
  * See https://www.geeksforgeeks.org/cuckoo-hashing/ for more details about this algorithm.
- * We use 2 hash tables each using its own key hashing.
  */
 class CuckooHashing implements HashingAlgorithm
 {
-    private CuckooHashTable $hashTable1;
-    private CuckooHashTable $hashTable2;
+    /** @var CuckooHashTable[]  */
+    private array $hashTables;
     private int $size = 0;
-    private int $capacity;
 
-    public function __construct(int $capacity = 16)
+    public function __construct(array $hashTables = [])
     {
-        $this->capacity = $capacity;
-        $this->hashTable1 = new CuckooHashTable($capacity, new JavaHasherCode());
-        $this->hashTable2 = new CuckooHashTable($capacity, new BitHasherCode());
+        if (empty($hashTables)) {
+            $hashTables = [
+                new CuckooHashTable(1024, new JavaHasherCode()),
+                new CuckooHashTable(1024, new BitHasherCode()),
+            ];
+        }
+
+        $this->hashTables = $hashTables;
     }
 
     public function set(string $key, $value): HashingAlgorithm
     {
         $entry = new Entry($key, $value);
 
-        if (!$this->hashTable1->hasKey($key) || $this->hashTable1->hasValueForKey($key)) {
-            $this->hashTable1->set($entry);
+        foreach ($this->hashTables as $hashTable) {
+            if (!$hashTable->hasKey($key) || $hashTable->hasValueForKey($key)) {
+                $hashTable->set($entry);
 
-            return $this;
+                return $this;
+            }
         }
 
-        if (!$this->hashTable2->hasKey($key) || $this->hashTable2->hasValueForKey($key)) {
-            $this->hashTable2->set($entry);
-
-            return $this;
-        }
-
-        $oldEntry = $this->hashTable1->get($key);
-        $this->hashTable1->set($entry);
+        $oldEntry = current($this->hashTables)->get($key);
+        current($this->hashTables)->set($entry);
         $counter = 0;
-        $hashTableNumber = 1;
+        $numberHashTables = count($this->hashTables);
+        $hashTableIndexToUse = $numberHashTables > 1 ? 1 : 0;
 
         while ($oldEntry !== null && $counter < $this->size + 1) {
-            if ($hashTableNumber === 0) {
-                $entry = $oldEntry;
-                $oldEntry = $this->hashTable1->get($entry->key);
-                $this->hashTable1->set($entry);
-            } else {
-                $entry = $oldEntry;
-                $oldEntry = $this->hashTable2->get($entry->key);
-                $this->hashTable2->set($entry);
-            }
+            $entry = $oldEntry;
+            $oldEntry = $this->hashTables[$hashTableIndexToUse]->get($entry->key);
+            $this->hashTables[$hashTableIndexToUse]->set($entry);
 
-            $hashTableNumber = 1 - $hashTableNumber;
+            $hashTableIndexToUse = ($hashTableIndexToUse + 1) % $numberHashTables;
             ++$counter;
         }
 
@@ -73,36 +67,42 @@ class CuckooHashing implements HashingAlgorithm
 
     public function get(string $key)
     {
-        return $this->hashTable1->hasValueForKey($key)
-            ? $this->hashTable1->get($key)->value
-            : $this->hashTable2->get($key)->value;
+        foreach ($this->hashTables as $hashTable) {
+            if ($hashTable->hasValueForKey($key)) {
+                return $hashTable->get($key)->value;
+            }
+        }
+
+        return null;
     }
 
     public function has(string $key): bool
     {
-        return $this->hashTable1->hasValueForKey($key) || $this->hashTable2->hasValueForKey($key);
+        foreach ($this->hashTables as $hashTable) {
+            if ($hashTable->hasValueForKey($key)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function rehash(): void
     {
-        $oldHashTable1 = $this->hashTable1;
-        $oldHashTable2 = $this->hashTable2;
-
-        $this->capacity *= 2;
         $this->size = 0;
 
-        $this->hashTable1 = $this->hashTable1->createNew($this->capacity);
-        $this->hashTable2 = $this->hashTable2->createNew($this->capacity);
+        $oldHashTables = $this->hashTables;
+        $this->hashTables = [];
 
-        foreach ($oldHashTable1 as $entry) {
-            if ($entry) {
-                $this->set($entry->key, $entry->value);
-            }
+        foreach ($oldHashTables as $hashTable) {
+            $this->hashTables[] = $hashTable->createNew($hashTable->getCapacity() * 2);
         }
 
-        foreach ($oldHashTable2 as $entry) {
-            if ($entry) {
-                $this->set($entry->key, $entry->value);
+        foreach ($oldHashTables as $hashTable) {
+            foreach ($hashTable as $entry) {
+                if ($entry) {
+                    $this->set($entry->key, $entry->value);
+                }
             }
         }
     }
