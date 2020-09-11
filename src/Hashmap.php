@@ -24,6 +24,10 @@ class Hashmap
 
     public function find(string $key)
     {
-        return $this->data[$key];
+        if (isset($this->data[$key])) {
+            return $this->data[$key];
+        }
+
+        throw new ValueNotFoundException(sprintf("Couldn't find a value for the key '%s'.", $key));
     }
 }

@@ -4,6 +4,7 @@ namespace Easyrecrue\Tests;
 
 use Easyrecrue\Hashmap;
 use Easyrecrue\User;
+use Easyrecrue\ValueNotFoundException;
 use PHPUnit\Framework\TestCase;
 
 class HashmapTest extends TestCase
@@ -35,5 +36,15 @@ class HashmapTest extends TestCase
         $hashmap->add(new User(6, 'Thomas'));
 
         $this->assertEquals($expected, $hashmap->find(5));
+    }
+
+    public function test_it_throws_an_exception_if_it_cant_find_a_value_matching_the_key()
+    {
+        $hashmap = new Hashmap('md5');
+
+        $this->expectException(ValueNotFoundException::class);
+        $this->expectExceptionMessage("Couldn't find a value for the key 'no-key-matching'.");
+
+        $hashmap->find('no-key-matching');
     }
 }
