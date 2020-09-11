@@ -37,8 +37,3 @@ class HashmapTest extends TestCase
         $this->assertEquals($expected, $hashmap->find(5));
     }
 }
-
-function getId(User $user)
-{
-    return $user->getId();
-}
