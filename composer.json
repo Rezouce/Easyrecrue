@@ -1,0 +1,21 @@
+{
+    "name": "rezouce/easyrecruehashmap",
+    "type": "project",
+    "description": "Technical test for EASYRECRUE",
+    "require": {
+        "php": "^7.4",
+        "phpunit/phpunit": "^9.3"
+    },
+    "require-dev": {
+    },
+    "autoload": {
+        "psr-4": {
+            "Easyrecrue\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Easyrecrue\\Tests\\": "tests/"
+        }
+    }
+}
