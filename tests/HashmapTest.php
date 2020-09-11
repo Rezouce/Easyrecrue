@@ -3,6 +3,7 @@
 namespace Easyrecrue\Tests;
 
 use Easyrecrue\Hashmap;
+use Easyrecrue\KeyAlreadyUsedException;
 use Easyrecrue\User;
 use Easyrecrue\ValueNotFoundException;
 use PHPUnit\Framework\TestCase;
@@ -46,5 +47,21 @@ class HashmapTest extends TestCase
         $this->expectExceptionMessage("Couldn't find a value for the key 'no-key-matching'.");
 
         $hashmap->find('no-key-matching');
+    }
+
+    /**
+     * Since the Hashmap has a add method instead of a put or set, we consider that if a key is already used,
+     * we don't override the value but we throw an exception.
+     */
+    public function test_it_throws_an_exception_if_there_is_a_key_collision()
+    {
+        $hashmap = new Hashmap('getId');
+
+        $this->expectException(KeyAlreadyUsedException::class);
+        $this->expectExceptionMessage("The key '1' is already used.");
+
+        $hashmap
+            ->add(new User(1, 'Florian'))
+            ->add(new User(1, 'Quentin'));
     }
 }

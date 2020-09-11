@@ -16,10 +16,15 @@ class Hashmap
     public function add($value): self
     {
         $function = $this->functionNameForKeyHash;
+        $key = $function($value);
 
-        $this->data[$function($value)] = $value;
+        if (empty($this->data[$key])) {
+            $this->data[$key] = $value;
 
-        return $this;
+            return $this;
+        }
+
+        throw new KeyAlreadyUsedException(sprintf("The key '%s' is already used.", $key));
     }
 
     public function find(string $key)
