@@ -11,6 +11,10 @@ class Hashmap
     public function __construct(string $functionNameForKeyHash)
     {
         $this->functionNameForKeyHash = $functionNameForKeyHash;
+
+        if (!function_exists($functionNameForKeyHash)) {
+            throw new InvalidFunctionNameException(sprintf("There is no function named '%s'.", $functionNameForKeyHash));
+        }
     }
 
     public function add($value): self

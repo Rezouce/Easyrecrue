@@ -3,6 +3,7 @@
 namespace Easyrecrue\Tests;
 
 use Easyrecrue\Hashmap;
+use Easyrecrue\InvalidFunctionNameException;
 use Easyrecrue\KeyAlreadyUsedException;
 use Easyrecrue\User;
 use Easyrecrue\ValueNotFoundException;
@@ -63,5 +64,13 @@ class HashmapTest extends TestCase
         $hashmap
             ->add(new User(1, 'Florian'))
             ->add(new User(1, 'Quentin'));
+    }
+
+    public function test_it_throws_an_exception_if_provided_a_function_name_that_doesnt_exist()
+    {
+        $this->expectException(InvalidFunctionNameException::class);
+        $this->expectExceptionMessage("There is no function named 'not_existing_function_name'.");
+
+        $hashmap = new Hashmap('not_existing_function_name');
     }
 }
